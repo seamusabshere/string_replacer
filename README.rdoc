@@ -1,16 +1,91 @@
 = string_replacer
 
-Description goes here.
+Repeatedly replace text in a file without disturbing the rest of the file.
 
-== Note on Patches/Pull Requests
- 
-* Fork the project.
-* Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a
-  future version unintentionally.
-* Commit, do not mess with rakefile, version, or history.
-  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
-* Send me a pull request. Bonus points for topic branches.
+== Use
+
+  $ string_replacer PATH STRING [REPLACEMENT_ID] [AFTER_LINE]
+
+For example:
+
+  $ echo "hello" > test.txt
+  $ cat test.txt 
+  hello
+  $ string_replacer test.txt "Don't forget to say \"hello world\"" "Just a reminder"
+  $ cat test.txt
+  hello
+
+  # START StringReplacer Just a reminder -- DO NOT MODIFY
+  Don't forget to say "hello world"
+  # END StringReplacer Just a reminder -- DO NOT MODIFY
+
+Now I swap it out by using the same <tt>REPLACEMENT_ID</tt>...
+
+  $ string_replacer test.txt "YOU ARE STILL FORGETTING to say \"hello world\"" "Just a reminder"
+  $ cat test.txt
+  hello
+
+  # START StringReplacer Just a reminder -- DO NOT MODIFY
+  YOU ARE STILL FORGETTING to say "hello world"
+  # END StringReplacer Just a reminder -- DO NOT MODIFY
+
+And finally, to demonstrate that <tt>REPLACEMENT_ID</tt> is case-sensitive...
+
+  $ string_replacer test.txt "Nevermind" "Just a Reminder"
+  $ cat test.txt
+  hello
+
+  # START StringReplacer Just a reminder -- DO NOT MODIFY
+  YOU ARE STILL FORGETTING to say "hello world"
+  # END StringReplacer Just a reminder -- DO NOT MODIFY
+
+  # START StringReplacer Just a Reminder -- DO NOT MODIFY
+  Nevermind
+  # END StringReplacer Just a Reminder -- DO NOT MODIFY
+
+If you don't specify <tt>REPLACEMENT_ID</tt>, it will default to "1."
+
+== Real-world usage
+
+http://brighterplanet.com uses it to unmask the memcached 1.4.4 package on http://engineyard.com AppCloud (i.e. Amazon EC2) instances.
+
+We have this in our before_restart.rb hook:
+
+  ###############################################################
+  # make sure we have string_replacer installed at the system level
+  ###############################################################
+  sudo 'gem install string_replacer --no-rdoc --no-ri'
+
+  ###############################################################
+  # install memcached 1.4.4, which is not available by default
+  ###############################################################
+  memcached_server_version = '1.4.4'
+  unless `/usr/bin/memcached -h`.include?(memcached_server_version)
+    sudo "/usr/bin/string_replacer /etc/portage/package.keywords/local \"=net-misc/memcached-#{memcached_server_version}\" \"make sure memcached #{memcached_server_version} is available\""
+    sudo "emerge net-misc/memcached"
+  end
+  sudo "cp #{release_path}/deploy/memcached/memcached.#{node[:environment][:name]} /etc/conf.d/memcached"
+
+Before:
+
+  $ cat /etc/portage/package.keywords/local
+  =dev-lang/ruby-1.8.7_p174  
+
+After:
+
+  $ cat /etc/portage/package.keywords/local
+  =dev-lang/ruby-1.8.7_p174
+
+  # START StringReplacer make sure memcached 1.4.4 is available -- DO NOT MODIFY
+  =net-misc/memcached-1.4.4
+  # END StringReplacer make sure memcached 1.4.4 is available -- DO NOT MODIFY
+
+== Obvious flaws
+
+* assumes whitespace is ignored
+* assumes # means comment
+* no idea how it would work on big files
+* there is probably a unix program that has done this since the 1970s
 
 == Copyright
 

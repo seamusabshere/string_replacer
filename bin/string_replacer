@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require 'string_replacer'
+
+path, string, replacement_id, after_line = ARGV
+
+s = StringReplacer.new path
+s.replace! string, replacement_id, after_line
