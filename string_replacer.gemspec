@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{string_replacer}
-  s.version = "0.0.0"
+  s.version = "0.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Seamus Abshere"]
@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
      "VERSION",
      "bin/string_replacer",
      "lib/string_replacer.rb",
+     "string_replacer.gemspec",
      "test/helper.rb",
      "test/test_string_replacer.rb"
   ]
